@@ -7,9 +7,11 @@ int Vheight;
 PImage movementImg;   
 ArrayList bubbles; 
 PImage[] bubblePNG;
+PImage donut;
+int donuttimer;
 
 int poppedBubbles;
-static int maxBubbles=10;
+static int maxBubbles=25;
 static float SPEED=0.2;
 
 
@@ -29,11 +31,14 @@ void setup(){
   sumpixels=Vwidth*Vheight;
   
     bubblePNG=new PImage[25];
-    for(int i=0;i<7;i++){
+    for(int i=0;i<25;i++){
       int  j=i+1;
         bubblePNG[i]=loadImage("image/"+j+".png");
-        bubblePNG[i].resize(120,120);
+        bubblePNG[i].resize(250,250);
     }
+    donut=loadImage("image/45.png");
+    donut.resize(600,600);
+    donuttimer=0;
   
     movementImg = new PImage( 640, 480 ); 
     bubbles = new ArrayList();              //  Initialises the ArrayList
@@ -46,7 +51,7 @@ void setup(){
     previousFrame=new int[sumpixels];
     
     alpha=1;
-    beta=0.5;
+    beta=1;
     maxValue=0;
     maxPos=0;
 
@@ -57,6 +62,7 @@ void setup(){
 
 void draw(){
     //background(0);
+           
     
             if(video.available()){
                   video.read();
@@ -119,8 +125,28 @@ void draw(){
 
              }
              background(0);
+            
+
+            //pushMatrix();
+
+            //rotate(radians(60));
+
+            if(donuttimer==0){
+              donuttimer=1;
+              donut.resize(620,620);
+              image(donut,310,170);
+            }
+            else{
+              donuttimer=0;
+              donut.resize(600,600);
+               image(donut,340,180);
+            }
              // image(video,0,0);
               println(maxValue);
+            //image(donut,340,180);
+            //popMatrix();
+            
+            
               
     
     
@@ -131,17 +157,26 @@ void draw(){
     
     
     if(poppedBubbles<maxBubbles){
-    bubbles.add(new Bubble( (float)random( 40, Vwidth-100 ),(float)random( 40, Vheight-100 ), 40.0, 40.0));
+    bubbles.add(new Bubble( (float)random( 40, Vwidth-100 ),(float)random( 40, Vheight-100 ), 80.0, 80.0));
     poppedBubbles++;
     }
 
     for ( int i = 0; i < bubbles.size(); i++ ){   
     Bubble _bubble = (Bubble) bubbles.get(i);    
     //ellipse(_bubble.bubbleX,_bubble.bubbleY,_bubble.bubbleWidth,_bubble.bubbleHeight);
+    
+    _bubble.timer++;
+    if(_bubble.timer>2)
+        _bubble.timer-=6;
+    
+    if(_bubble.timer>0)
+        bubblePNG[_bubble.PNGNo].resize(255,255);
+    else
+        bubblePNG[_bubble.PNGNo].resize(250,250);
     image(bubblePNG[_bubble.PNGNo],_bubble.bubbleX*2,_bubble.bubbleY*2);
     _bubble.update();   
-     _bubble.collider(mouseX/2,mouseY/2);
-    //_bubble.collider(maxPos%Vwidth,maxPos/Vwidth);
+     //_bubble.collider(mouseX/2,mouseY/2);
+    _bubble.collider(maxPos%Vwidth,maxPos/Vwidth);
     if(_bubble.bubbleX<0||_bubble.bubbleX>Vwidth||_bubble.bubbleY<0||_bubble.bubbleY>Vheight)
     {
         bubbles.remove(i);
@@ -181,6 +216,7 @@ class Bubble
   float forceAngle;
   
   int PNGNo;
+  int timer;
   
   Bubble ( float bX, float bY, float bW, float bH )           //  The class constructor- sets the values when a new bubble object is made
   {
@@ -190,14 +226,15 @@ class Bubble
     bubbleHeight = bH;
     forceStrength=0;
     forceAngle=0;
-    PNGNo=(int)random(0,7);
+    PNGNo=(int)random(0,24.5);
+    timer=0;
   }
   
   int update()      //   The Bubble update function
   {
       if (forceStrength>0){
           bubbleX+=this.forceStrength*Math.cos(this.forceAngle);
-          bubbleY-=this.forceStrength*Math.sin(this.forceAngle);
+          bubbleY+=this.forceStrength*Math.sin(this.forceAngle);
           return 1;
       }                    
     return 0;
@@ -207,11 +244,14 @@ class Bubble
     double distance=Math.pow(forceX-bubbleX,2)+Math.pow(forceY-bubbleY,2);
     if(distance<Math.pow( bubbleWidth,2)){
       int flag=forceX<bubbleX?1:-1;
-      int flag2=forceY>bubbleY?1:-1;
+      int flag2=forceY<bubbleY?1:-1;
       forceStrength+=SPEED;
       double forceAngleCos=Math.pow(forceX-bubbleX,2)/distance;
       float www=(float)forceAngleCos;
-      forceAngle=(float)Math.acos(sqrt(www))*flag*flag2;
+      www=sqrt(www);
+      if(flag<0)
+        www*=-1.0;
+      forceAngle=(float)Math.acos(www)*flag2;
       return 1;
     }   
     
