@@ -1,5 +1,10 @@
 import processing.video.*;          //  Imports the OpenCV library
 
+import ddf.minim.*;
+
+Minim minim;
+AudioPlayer player,cat1,cat2;
+
 int sumpixels;
 int Vwidth;
 int Vheight;
@@ -56,6 +61,9 @@ void setup(){
     maxPos=0;
 
     background(0);
+    //player = minim.loadFile("1.mp3",1024);
+    //cat1 = minim.loadFile("cat.mp3",1024);
+    //cat2 = minim.loadFile("cat.mp3",1024);
 
 }
 
