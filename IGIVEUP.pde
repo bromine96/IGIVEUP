@@ -14,10 +14,11 @@ ArrayList bubbles;
 PImage[] bubblePNG;
 PImage donut;
 int donuttimer;
+PImage catzhua;
 
 int poppedBubbles;
 static int maxBubbles=25;
-static float SPEED=0.2;
+static float SPEED=10;
 
 
 Capture video;
@@ -25,26 +26,28 @@ int[] previousFrame;
 
 float alpha,beta;
 float maxValue;
-int maxPos;
+int[] maxPos;
 
 
 void setup(){
   size(1280,960);
   
-  Vwidth=640;
-  Vheight=480;
+  Vwidth=1280;
+  Vheight=960;
   sumpixels=Vwidth*Vheight;
   
     bubblePNG=new PImage[25];
     for(int i=0;i<25;i++){
       int  j=i+1;
         bubblePNG[i]=loadImage("image/"+j+".png");
-        bubblePNG[i].resize(250,250);
+        bubblePNG[i].resize(200,200);
     }
     donut=loadImage("image/45.png");
     donut.resize(600,600);
     donuttimer=0;
-  
+    catzhua = loadImage("image/50.png");
+    catzhua.resize(300,300);
+    
     movementImg = new PImage( 640, 480 ); 
     bubbles = new ArrayList();              //  Initialises the ArrayList
     //bubblePNG = loadImage("cloud.png");  
@@ -52,21 +55,25 @@ void setup(){
     
 
     video = new Capture(this, Vwidth, Vheight);
+    video.resize(1280,960);
     video.start(); 
     previousFrame=new int[sumpixels];
     
     alpha=1;
     beta=1;
     maxValue=0;
-    maxPos=0;
+    maxPos=new int [2];
+    maxPos[1]=0;
+    maxPos[0]=0;
+
 
     background(0);
     minim=new Minim(this);
     player = minim.loadFile("1.mp3",1024);
     player.play();
-    cat1 = minim.loadFile("cat.mp3",1024);
+    cat1 = minim.loadFile("cat.mp3",400);
     cat2 = minim.loadFile("cat.mp3",1024);
-
+    
 }
 
 
@@ -79,7 +86,8 @@ void draw(){
                   video.loadPixels();
             
             maxValue=0;
-            maxPos=0;
+            maxPos[1]=0;
+            maxPos[0]=0;
     
                 for(int i=0;i<sumpixels/Vwidth;i++){
                   for(int j=0;j<sumpixels/Vheight;j++){
@@ -125,7 +133,8 @@ void draw(){
                         int x=soq%Vwidth;
                         int y=soq/Vwidth;
                         if(Math.pow(x-i,2)+Math.pow(y-j,2)>10)
-                        maxPos=soq;
+                        maxPos[0]=i;
+                        maxPos[1]=Vwidth-j-1;
                        }
                     
                 
@@ -151,7 +160,7 @@ void draw(){
               donut.resize(600,600);
                image(donut,340,180);
             }
-             // image(video,0,0);
+              //image(video,0,0);
               println(maxValue);
             //image(donut,340,180);
             //popMatrix();
@@ -167,7 +176,7 @@ void draw(){
     
     
     if(poppedBubbles<maxBubbles){
-    bubbles.add(new Bubble( (float)random( 40, Vwidth-100 ),(float)random( 40, Vheight-100 ), 80.0, 80.0));
+    bubbles.add(new Bubble( (float)random( 40, Vwidth-100 ),(float)random( 40, Vheight-100 ), 40.0, 40.0));
     poppedBubbles++;
     }
 
@@ -180,13 +189,13 @@ void draw(){
         _bubble.timer-=6;
     
     if(_bubble.timer>0)
-        bubblePNG[_bubble.PNGNo].resize(255,255);
+        bubblePNG[_bubble.PNGNo].resize(205,205);
     else
-        bubblePNG[_bubble.PNGNo].resize(250,250);
-    image(bubblePNG[_bubble.PNGNo],_bubble.bubbleX*2,_bubble.bubbleY*2);
+        bubblePNG[_bubble.PNGNo].resize(200,200);
+    image(bubblePNG[_bubble.PNGNo],_bubble.bubbleX,_bubble.bubbleY);
     _bubble.update();   
      //_bubble.collider(mouseX/2,mouseY/2);
-    _bubble.collider(maxPos%Vwidth,maxPos/Vwidth);
+    _bubble.collider(maxPos[1],maxPos[0]);
     if(_bubble.bubbleX<0||_bubble.bubbleX>Vwidth||_bubble.bubbleY<0||_bubble.bubbleY>Vheight)
     {
         bubbles.remove(i);
@@ -199,7 +208,8 @@ void draw(){
   
      
      fill(255);
-     rect(maxPos%Vwidth*2,maxPos/Vwidth*2,6,6);
+     rect(maxPos[1],maxPos[0],12,12);
+     image(catzhua,maxPos[1],maxPos[0]);
   
   
   
@@ -263,16 +273,20 @@ class Bubble
       if(flag<0)
         www*=-1.0;
       forceAngle=(float)Math.acos(www)*flag2;
-      return 1;
+      
     } 
-    //if(random(0,5)>3)
+    if(random(0,100)>99){
+    //cat1.rewind();
     cat1.play();
-    return 0;
+    }
+
+    return 1;
   }
   
   void keyPressed()
 {
-    cat1.rewind();
+  cat1.rewind();
+   cat1.play();
 }
 
 }
