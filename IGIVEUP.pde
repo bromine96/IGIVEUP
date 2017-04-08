@@ -61,9 +61,11 @@ void setup(){
     maxPos=0;
 
     background(0);
-    //player = minim.loadFile("1.mp3",1024);
-    //cat1 = minim.loadFile("cat.mp3",1024);
-    //cat2 = minim.loadFile("cat.mp3",1024);
+    minim=new Minim(this);
+    player = minim.loadFile("1.mp3",1024);
+    player.play();
+    cat1 = minim.loadFile("cat.mp3",1024);
+    cat2 = minim.loadFile("cat.mp3",1024);
 
 }
 
@@ -250,6 +252,7 @@ class Bubble
   
   public int collider(float forceX, float forceY){
     double distance=Math.pow(forceX-bubbleX,2)+Math.pow(forceY-bubbleY,2);
+    
     if(distance<Math.pow( bubbleWidth,2)){
       int flag=forceX<bubbleX?1:-1;
       int flag2=forceY<bubbleY?1:-1;
@@ -261,10 +264,15 @@ class Bubble
         www*=-1.0;
       forceAngle=(float)Math.acos(www)*flag2;
       return 1;
-    }   
-    
+    } 
+    //if(random(0,5)>3)
+    cat1.play();
     return 0;
   }
   
-  
+  void keyPressed()
+{
+    cat1.rewind();
+}
+
 }
